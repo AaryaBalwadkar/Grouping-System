@@ -6,14 +6,17 @@ package groupingsystem;
 
 import java.awt.*;
 import javax.swing.*;
-
+import java.awt.event.*;
 /**
  *
  * @author Aarya
  */
-public class Signup extends JFrame{
+public class Signup extends JFrame implements ActionListener{
     
-    Signup(){
+	JButton btsignup;
+	JTextField tfname,tfprn,tfemail,tfbranch,tfyear,tfgender;
+	
+	Signup(){
         setSize(1200,700);
         setLocation(200,100);
         setLayout(null);
@@ -62,7 +65,7 @@ public class Signup extends JFrame{
         lbname.setFont(new Font("Arial", Font.BOLD, 16));
         p2.add(lbname);
         
-        JTextField tfname = new JTextField();
+        tfname = new JTextField();
         tfname.setBounds(100,220,350,40);
         tfname.setFont(new Font("Arial", Font.PLAIN, 20));
         tfname.setBorder(BorderFactory.createBevelBorder(1, Color.lightGray, Color.lightGray));
@@ -74,7 +77,7 @@ public class Signup extends JFrame{
         lbprn.setFont(new Font("Arial", Font.BOLD, 16));
         p2.add(lbprn);
         
-        JTextField tfprn = new JTextField();
+        tfprn = new JTextField();
         tfprn.setBounds(100,280,350,40);
         tfprn.setFont(new Font("Arial", Font.PLAIN, 20));
         tfprn.setBorder(BorderFactory.createBevelBorder(1, Color.lightGray, Color.lightGray));
@@ -86,7 +89,7 @@ public class Signup extends JFrame{
         lbemail.setFont(new Font("Arial", Font.BOLD, 16));
         p2.add(lbemail);
         
-        JTextField tfemail = new JTextField();
+        tfemail = new JTextField();
         tfemail.setBounds(100,340,350,40);
         tfemail.setFont(new Font("Arial", Font.PLAIN, 20));
         tfemail.setBorder(BorderFactory.createBevelBorder(1, Color.lightGray, Color.lightGray));
@@ -98,7 +101,7 @@ public class Signup extends JFrame{
         lbbranch.setFont(new Font("Arial", Font.BOLD, 16));
         p2.add(lbbranch);
         
-        JTextField tfbranch = new JTextField();
+        tfbranch = new JTextField();
         tfbranch.setBounds(100,400,350,40);
         tfbranch.setFont(new Font("Arial", Font.PLAIN, 20));
         tfbranch.setBorder(BorderFactory.createBevelBorder(1, Color.lightGray, Color.lightGray));
@@ -110,7 +113,7 @@ public class Signup extends JFrame{
         lbgender.setFont(new Font("Arial", Font.BOLD, 16));
         p2.add(lbgender);
         
-        JTextField tfgender = new JTextField();
+        tfgender = new JTextField();
         tfgender.setBounds(100,460,350,40);
         tfgender.setFont(new Font("Arial", Font.PLAIN, 20));
         tfgender.setBorder(BorderFactory.createBevelBorder(1, Color.lightGray, Color.lightGray));
@@ -122,26 +125,50 @@ public class Signup extends JFrame{
         lbyear.setFont(new Font("Arial", Font.BOLD, 16));
         p2.add(lbyear);
         
-        JTextField tfyear = new JTextField();
+        tfyear = new JTextField();
         tfyear.setBounds(100,520,350,40);
         tfyear.setFont(new Font("Arial", Font.PLAIN, 20));
         tfyear.setBorder(BorderFactory.createBevelBorder(1, Color.lightGray, Color.lightGray));
         p2.add(tfyear);
               
         // Signup button
-        JButton btlogin = new JButton("Signup");
-        btlogin.setBounds(100,600,350,40);
-        btlogin.setBackground(new Color(255,219,187));
-        btlogin.setBorder(BorderFactory.createEmptyBorder());
-        btlogin.setFont(new Font("Arial", Font.BOLD, 20));
-        p2.add(btlogin);
+        btsignup = new JButton("Signup");
+        btsignup.setBounds(100,600,350,40);
+        btsignup.setBackground(new Color(255,219,187));
+        btsignup.setBorder(BorderFactory.createEmptyBorder());
+        btsignup.setFont(new Font("Arial", Font.BOLD, 20));
+        p2.add(btsignup);
+        btsignup.addActionListener(this);
         
-        for(String fontname: GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()){
-            System.out.println(fontname);
-        }
+
         setVisible(true);
     }
     
+    public void actionPerformed(ActionEvent ae) {
+    	if(ae.getSource()==btsignup) {
+    		String name=tfname.getText();
+    		String prn=tfprn.getText();
+    		String email=tfemail.getText();
+    		String branch=tfbranch.getText();
+    		String year=tfyear.getText();
+    		int yearInt = Integer.parseInt(year);
+    		String gender=tfgender.getText();
+    		String query = "insert into student values('" + prn + "','" + name + "','" + email + "','" + branch + "','" + gender + "','" + yearInt + "')";
+    		try {
+    			Conn c=new Conn();
+    			c.s.executeUpdate(query);
+    			JOptionPane.showMessageDialog(null,"Data Entered Successfully");
+    			setVisible(false);
+    			new Signup();
+    			
+    		}catch (Exception e) {
+    			e.printStackTrace();
+    		}
+			
+    	}
+    	
+    }
+       
     public static void main(String[] args){
         new Signup();
     }
