@@ -14,14 +14,14 @@ import javax.swing.*;
 public class Signup extends JFrame{
     
     Signup(){
-        setSize(1200,600);
+        setSize(1200,700);
         setLocation(200,100);
         setLayout(null);
         
         // ---------------Right section--------------
         JPanel p1 = new JPanel();
         p1.setBackground(new Color(255,219,187));
-        p1.setBounds(600,0,600, 600);
+        p1.setBounds(600,0,600, 700);
         p1.setLayout(null);
         add(p1);
         
@@ -30,17 +30,17 @@ public class Signup extends JFrame{
         Image i2 = i1.getImage().getScaledInstance(450, 450, Image.SCALE_DEFAULT);
         ImageIcon i3 = new ImageIcon(i2);
         JLabel image = new JLabel(i3);
-        image.setBounds(50,0, 500, 500);
+        image.setBounds(50,100, 500, 500);
         p1.add(image);
         
         // -------------Left section---------------
         JPanel p2 = new JPanel();
         p2.setBackground(Color.white);
-        p2.setBounds(0,0,600, 600);
+        p2.setBounds(0,0,600, 700);
         p2.setLayout(null);
         add(p2);
         
-        // Loing and tagline 
+        // Signup and tagline 
         JLabel lbtitle = new JLabel("Signup");
         lbtitle.setBounds(100,30,350,50);
         lbtitle.setFont(new Font("Arial", Font.BOLD, 40));
@@ -70,31 +70,67 @@ public class Signup extends JFrame{
         
         // PRN section
         JLabel lbprn = new JLabel("PRN");
-        lbprn.setBounds(100,280,100,25);
+        lbprn.setBounds(100,260,100,25);
         lbprn.setFont(new Font("Arial", Font.BOLD, 16));
         p2.add(lbprn);
         
         JTextField tfprn = new JTextField();
-        tfprn.setBounds(100,300,350,40);
+        tfprn.setBounds(100,280,350,40);
         tfprn.setFont(new Font("Arial", Font.PLAIN, 20));
         tfprn.setBorder(BorderFactory.createBevelBorder(1, Color.lightGray, Color.lightGray));
         p2.add(tfprn);
         
         // Email section
         JLabel lbemail = new JLabel("Email");
-        lbemail.setBounds(100,360,100,25);
+        lbemail.setBounds(100,320,100,25);
         lbemail.setFont(new Font("Arial", Font.BOLD, 16));
         p2.add(lbemail);
         
         JTextField tfemail = new JTextField();
-        tfemail.setBounds(100,380,350,40);
+        tfemail.setBounds(100,340,350,40);
         tfemail.setFont(new Font("Arial", Font.PLAIN, 20));
         tfemail.setBorder(BorderFactory.createBevelBorder(1, Color.lightGray, Color.lightGray));
         p2.add(tfemail);
+        
+        // Branch section
+        JLabel lbbranch = new JLabel("Branch");
+        lbbranch.setBounds(100,380,100,25);
+        lbbranch.setFont(new Font("Arial", Font.BOLD, 16));
+        p2.add(lbbranch);
+        
+        JTextField tfbranch = new JTextField();
+        tfbranch.setBounds(100,400,350,40);
+        tfbranch.setFont(new Font("Arial", Font.PLAIN, 20));
+        tfbranch.setBorder(BorderFactory.createBevelBorder(1, Color.lightGray, Color.lightGray));
+        p2.add(tfbranch);
+        
+        // Gender section
+        JLabel lbgender = new JLabel("Gender");
+        lbgender.setBounds(100,440,100,25);
+        lbgender.setFont(new Font("Arial", Font.BOLD, 16));
+        p2.add(lbgender);
+        
+        JTextField tfgender = new JTextField();
+        tfgender.setBounds(100,460,350,40);
+        tfgender.setFont(new Font("Arial", Font.PLAIN, 20));
+        tfgender.setBorder(BorderFactory.createBevelBorder(1, Color.lightGray, Color.lightGray));
+        p2.add(tfgender);
+        
+        // Year section
+        JLabel lbyear = new JLabel("Year");
+        lbyear.setBounds(100,500,100,25);
+        lbyear.setFont(new Font("Arial", Font.BOLD, 16));
+        p2.add(lbyear);
+        
+        JTextField tfyear = new JTextField();
+        tfyear.setBounds(100,520,350,40);
+        tfyear.setFont(new Font("Arial", Font.PLAIN, 20));
+        tfyear.setBorder(BorderFactory.createBevelBorder(1, Color.lightGray, Color.lightGray));
+        p2.add(tfyear);
               
         // Signup button
         JButton btlogin = new JButton("Signup");
-        btlogin.setBounds(100,470,350,40);
+        btlogin.setBounds(100,600,350,40);
         btlogin.setBackground(new Color(255,219,187));
         btlogin.setBorder(BorderFactory.createEmptyBorder());
         btlogin.setFont(new Font("Arial", Font.BOLD, 20));
