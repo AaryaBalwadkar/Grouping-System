@@ -6,7 +6,7 @@ import java.sql.*;
 import javax.swing.*;
 
 public class Login extends JFrame implements ActionListener {
-    JButton btlogin;
+    JButton btlogin,btsignuplink;
     JTextField tfemail, tfpassword;
 
     Login() {
@@ -70,6 +70,7 @@ public class Login extends JFrame implements ActionListener {
 
         tfpassword = new JTextField();
         tfpassword.setBounds(100, 300, 350, 40);
+        tfpassword.setFont(new Font("Arial", Font.PLAIN, 20));
         tfpassword.setBorder(BorderFactory.createBevelBorder(1, Color.lightGray, Color.lightGray));
         p2.add(tfpassword);
 
@@ -81,14 +82,35 @@ public class Login extends JFrame implements ActionListener {
         btlogin.setFont(new Font("Arial", Font.BOLD, 20));
         btlogin.addActionListener(this);
         p2.add(btlogin);
+        
+        // Signup page link
+        JLabel lbloginlink = new JLabel("Don't have an account?");
+        lbloginlink.setBounds(150,440,300,25);
+        lbloginlink.setFont(new Font("Arial", Font.BOLD, 16));
+        p2.add(lbloginlink);
+        
+        btsignuplink = new JButton("Signup");
+        btsignuplink.setBounds(330,440,60,25);
+        btsignuplink.setBackground(null);
+        btsignuplink.setForeground(Color.blue);
+        btsignuplink.setBorder(BorderFactory.createEmptyBorder());
+        btsignuplink.setFont(new Font("Arial", Font.BOLD, 16));
+        p2.add(btsignuplink);
+        btsignuplink.addActionListener(this);
 
         setVisible(true);
     }
 
     public void actionPerformed(ActionEvent ae) {
         if (ae.getSource() == btlogin) {
-            String email = tfemail.getText();
-            String prn = tfpassword.getText(); // treated as "password"
+            String email = tfemail.getText().trim();
+            String prn = tfpassword.getText().trim(); // treated as "password"
+
+            // Check for empty fields
+            if (email.isEmpty() || prn.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Please enter both email and PRN.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
             String query = "SELECT * FROM student WHERE email = '" + email + "' AND prn = '" + prn + "'";
 
@@ -96,7 +118,6 @@ public class Login extends JFrame implements ActionListener {
                 Conn c = new Conn();
                 ResultSet rs = c.s.executeQuery(query);
                 if (rs.next()) {
-                    JOptionPane.showMessageDialog(null, "Login Successful!");
                     setVisible(false);
                     new Loader(); // assuming this is your next screen
                 } else {
@@ -106,7 +127,17 @@ public class Login extends JFrame implements ActionListener {
                 e.printStackTrace();
             }
         }
+
+        if (ae.getSource() == btsignuplink) {
+            try {
+                setVisible(false);
+                new Signup();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
+
 
     public static void main(String[] args) {
         new Login();

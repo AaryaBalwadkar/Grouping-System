@@ -9,7 +9,7 @@ public class Conn {
     Conn() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            c = DriverManager.getConnection("jdbc:mysql://localhost:3306/dbms", "root", "mlem");
+            c = DriverManager.getConnection("jdbc:mysql://localhost:3306/groupingsystem", "root", "AARYA");
             System.out.println("connection successful");
             s = c.createStatement();
         } catch (Exception e) {

@@ -13,8 +13,9 @@ import java.awt.event.*;
  */
 public class Signup extends JFrame implements ActionListener{
     
-	JButton btsignup;
-	JTextField tfname,tfprn,tfemail,tfbranch,tfyear,tfgender;
+	JButton btsignup,btloginlink;
+	JTextField tfname,tfprn,tfemail;
+        Choice cyear, cgender, cbranch;
 	
 	Signup(){
         setSize(1200,700);
@@ -100,12 +101,15 @@ public class Signup extends JFrame implements ActionListener{
         lbbranch.setBounds(100,380,100,25);
         lbbranch.setFont(new Font("Arial", Font.BOLD, 16));
         p2.add(lbbranch);
-        
-        tfbranch = new JTextField();
-        tfbranch.setBounds(100,400,350,40);
-        tfbranch.setFont(new Font("Arial", Font.PLAIN, 20));
-        tfbranch.setBorder(BorderFactory.createBevelBorder(1, Color.lightGray, Color.lightGray));
-        p2.add(tfbranch);
+
+        cbranch = new Choice();
+        cbranch.setBounds(100,410,350,40);
+        cbranch.setFont(new Font("Arial", Font.PLAIN, 20));
+        cbranch.add("Computer");
+        cbranch.add("IT");
+        cbranch.add("Electronics");
+        cbranch.add("Mechanical");
+        p2.add(cbranch);
         
         // Gender section
         JLabel lbgender = new JLabel("Gender");
@@ -113,11 +117,12 @@ public class Signup extends JFrame implements ActionListener{
         lbgender.setFont(new Font("Arial", Font.BOLD, 16));
         p2.add(lbgender);
         
-        tfgender = new JTextField();
-        tfgender.setBounds(100,460,350,40);
-        tfgender.setFont(new Font("Arial", Font.PLAIN, 20));
-        tfgender.setBorder(BorderFactory.createBevelBorder(1, Color.lightGray, Color.lightGray));
-        p2.add(tfgender);
+        cgender = new Choice();
+        cgender.setBounds(100,470,350,40);
+        cgender.setFont(new Font("Arial", Font.PLAIN, 20));
+        cgender.add("Male");
+        cgender.add("Female");
+        p2.add(cgender);
         
         // Year section
         JLabel lbyear = new JLabel("Year");
@@ -125,48 +130,85 @@ public class Signup extends JFrame implements ActionListener{
         lbyear.setFont(new Font("Arial", Font.BOLD, 16));
         p2.add(lbyear);
         
-        tfyear = new JTextField();
-        tfyear.setBounds(100,520,350,40);
-        tfyear.setFont(new Font("Arial", Font.PLAIN, 20));
-        tfyear.setBorder(BorderFactory.createBevelBorder(1, Color.lightGray, Color.lightGray));
-        p2.add(tfyear);
+        cyear = new Choice();
+        cyear.setBounds(100,530,350,40);
+        cyear.setFont(new Font("Arial", Font.PLAIN, 20));
+        cyear.add("1");
+        cyear.add("2");
+        cyear.add("3");
+        cyear.add("4");
+        p2.add(cyear);
               
         // Signup button
         btsignup = new JButton("Signup");
-        btsignup.setBounds(100,600,350,40);
+        btsignup.setBounds(100,580,350,40);
         btsignup.setBackground(new Color(255,219,187));
         btsignup.setBorder(BorderFactory.createEmptyBorder());
         btsignup.setFont(new Font("Arial", Font.BOLD, 20));
         p2.add(btsignup);
         btsignup.addActionListener(this);
         
+        // Login page link
+        JLabel lbloginlink = new JLabel("Already have an account?");
+        lbloginlink.setBounds(150,620,300,25);
+        lbloginlink.setFont(new Font("Arial", Font.BOLD, 16));
+        p2.add(lbloginlink);
+        
+        btloginlink = new JButton("Login");
+        btloginlink.setBounds(350,620,50,25);
+        btloginlink.setBackground(null);
+        btloginlink.setForeground(Color.blue);
+        btloginlink.setBorder(BorderFactory.createEmptyBorder());
+        btloginlink.setFont(new Font("Arial", Font.BOLD, 16));
+        p2.add(btloginlink);
+        btloginlink.addActionListener(this);
+        
 
         setVisible(true);
     }
     
     public void actionPerformed(ActionEvent ae) {
-    	if(ae.getSource()==btsignup) {
-    		String name=tfname.getText();
-    		String prn=tfprn.getText();
-    		String email=tfemail.getText();
-    		String branch=tfbranch.getText();
-    		String year=tfyear.getText();
-    		int yearInt = Integer.parseInt(year);
-    		String gender=tfgender.getText();
-    		String query = "insert into student values('" + prn + "','" + name + "','" + email + "','" + branch + "','" + gender + "','" + yearInt + "')";
-    		try {
-    			Conn c=new Conn();
-    			c.s.executeUpdate(query);
-    			JOptionPane.showMessageDialog(null,"Data Entered Successfully");
-    			setVisible(false);
-    			new Signup();
-    			
-    		}catch (Exception e) {
-    			e.printStackTrace();
-    		}
-			
-    	}
-    	
+    if (ae.getSource() == btsignup) {
+        String name = tfname.getText().trim();
+        String prn = tfprn.getText().trim();
+        String email = tfemail.getText().trim();
+        String branch = cbranch.getSelectedItem();
+        String year = cyear.getSelectedItem();
+        String gender = cgender.getSelectedItem();
+
+        // Check if any field is empty
+        if (name.isEmpty() || prn.isEmpty() || email.isEmpty()
+                || branch.equals("Select Branch") || year.equals("Select Year") || gender.equals("Select Gender")) {
+            JOptionPane.showMessageDialog(null, "Please fill all the fields and make valid selections.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try {
+            int yearInt = Integer.parseInt(year); // Convert year only after validation
+            String query = "insert into student values('" + prn + "','" + name + "','" + email + "','" + branch + "','" + gender + "','" + yearInt + "',NULL)";
+
+            Conn c = new Conn();
+            c.s.executeUpdate(query);
+
+            JOptionPane.showMessageDialog(null, "Data Entered Successfully");
+            setVisible(false);
+            new Login();
+
+            } catch (NumberFormatException nfe) {
+                JOptionPane.showMessageDialog(null, "Please select a valid year.", "Format Error", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (ae.getSource() == btloginlink) {
+            try {
+                setVisible(false);
+                new Login();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
        
     public static void main(String[] args){
