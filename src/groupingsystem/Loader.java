@@ -16,20 +16,24 @@ public class Loader extends JFrame implements Runnable {
     JProgressBar bar;
     
     public void run(){
-        try{
-            for(int i = 0; i <= 101; i++){
+        try {
+            for (int i = 0; i <= 101; i++) {
                 int max = bar.getMaximum();
                 int value = bar.getValue();
                 
-                if(value < max){
+                if (value < max) {
                     bar.setValue(bar.getValue() + (i*i)/50);
-                } else{
+                } else {
                     setVisible(false);
+                    // Start Quiz on EDT
+                    SwingUtilities.invokeLater(() -> new Quiz());
+                    dispose();
+                    break; // Exit the loop to prevent multiple Quiz instantiations
                 }
                 Thread.sleep(50);
             }
-        }catch(Exception e){
-            
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
     
@@ -66,6 +70,7 @@ public class Loader extends JFrame implements Runnable {
         t.start();
         setVisible(true);
     }
+    
     public static void main(String[] args){
         new Loader();
     }
