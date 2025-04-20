@@ -2,6 +2,8 @@ package groupingsystem;
 
 import java.awt.*;
 import javax.swing.*;
+import java.sql.*;
+import java.util.Arrays;
 
 public class Quiz extends JFrame {
 
@@ -9,6 +11,9 @@ public class Quiz extends JFrame {
     JLabel lbA, lbB, lbC, lbD, imageLabel;
     JButton btnext, btprev;
     int currentQuestion = 0;
+    String prn;
+    String selectedRole;
+    String[] answers; // Store answers for all questions
 
     // Data structure to store questions
     String[][] options = {
@@ -23,12 +28,17 @@ public class Quiz extends JFrame {
         "images/Quiz2Image.png",
         "images/Quiz3Image.png",
         "images/Quiz4Image.png",
-        "images/Quiz4Image.png"
+        "images/Quiz5Image.png"
     };
 
     ButtonGroup buttonGroup;
 
-    Quiz() {
+    Quiz(String prn, String selectedRole) {
+        this.prn = prn;
+        this.selectedRole = selectedRole;
+        this.answers = new String[options.length]; // Initialize answers array
+        Arrays.fill(answers, null); // Set all answers to null initially
+
         setSize(1200, 600);
         setLocation(200, 100);
         setLayout(null);
@@ -122,26 +132,59 @@ public class Quiz extends JFrame {
 
         // Next/Submit button action
         btnext.addActionListener(e -> {
+            // Save current answer
+            String selectedAnswer = getSelectedAnswer();
+            if (selectedAnswer == null) {
+                JOptionPane.showMessageDialog(this, "Please select an option before proceeding.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            answers[currentQuestion] = selectedAnswer;
+
             if (currentQuestion < options.length - 1) {
                 // Move to next question
                 currentQuestion++;
                 loadQuestion(currentQuestion);
                 buttonGroup.clearSelection();
             } else {
-                // Handle submit action
-                JOptionPane.showMessageDialog(this, "Quiz submitted! Results will be displayed.");
-                // Optionally, close the quiz or show results
-                dispose();
+                // Submit quiz and save responses
+                try {
+                    saveResponses();
+                    boolean groupCreated = tryFormGroup();
+                    if (groupCreated) {
+                        JOptionPane.showMessageDialog(this, "Quiz submitted and group assigned!");
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Quiz submitted. Waiting for more students to form a group.");
+                    }
+                    dispose();
+                    new Login(selectedRole);
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
             updateButtonStates();
         });
 
         // Previous button action
         btprev.addActionListener(e -> {
+            // Save current answer
+            String selectedAnswer = getSelectedAnswer();
+            if (selectedAnswer != null) {
+                answers[currentQuestion] = selectedAnswer;
+            }
+
             if (currentQuestion > 0) {
                 currentQuestion--;
                 loadQuestion(currentQuestion);
                 buttonGroup.clearSelection();
+                // Restore previous answer if available
+                if (answers[currentQuestion] != null) {
+                    switch (answers[currentQuestion]) {
+                        case "A" -> radiobtnA.setSelected(true);
+                        case "B" -> radiobtnB.setSelected(true);
+                        case "C" -> radiobtnC.setSelected(true);
+                        case "D" -> radiobtnD.setSelected(true);
+                    }
+                }
             }
             updateButtonStates();
         });
@@ -174,14 +217,155 @@ public class Quiz extends JFrame {
 
     private void updateButtonStates() {
         btprev.setEnabled(currentQuestion > 0);
-        if (currentQuestion == options.length - 1) {
-            btnext.setText("Submit");
-        } else {
-            btnext.setText("Next");
+        btnext.setText(currentQuestion == options.length - 1 ? "Submit" : "Next");
+    }
+
+    private String getSelectedAnswer() {
+        if (radiobtnA.isSelected()) return "A";
+        if (radiobtnB.isSelected()) return "B";
+        if (radiobtnC.isSelected()) return "C";
+        if (radiobtnD.isSelected()) return "D";
+        return null;
+    }
+
+    private void saveResponses() throws SQLException {
+        Conn conn = new Conn();
+        conn.c.setAutoCommit(false); // Start transaction
+        try {
+            // Validate answers
+            for (String answer : answers) {
+                if (answer == null || !answer.matches("[A-D]")) {
+                    throw new SQLException("Invalid quiz answer");
+                }
+            }
+            
+            String query = "INSERT INTO Response (Ans1FieldOfInterest, Ans2, Ans3, Ans4, Ans5, PRN) VALUES (?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement ps = conn.c.prepareStatement(query)) {
+                ps.setString(1, answers[0]);
+                ps.setString(2, answers[1]);
+                ps.setString(3, answers[2]);
+                ps.setString(4, answers[3]);
+                ps.setString(5, answers[4]);
+                ps.setString(6, prn);
+                ps.executeUpdate();
+            }
+            
+            conn.c.commit();
+        } catch (SQLException e) {
+            conn.c.rollback();
+            throw e;
+        }
+    }
+
+    private boolean tryFormGroup() throws SQLException {
+        Conn conn = new Conn();
+        conn.c.setAutoCommit(false); // Start transaction
+        try {
+            String ans1Field = answers[0];
+            int field_id = switch (ans1Field) {
+                case "A" -> 1;
+                case "B" -> 2;
+                case "C" -> 3;
+                case "D" -> 4;
+                default -> throw new IllegalArgumentException("Invalid field of interest");
+            };
+            
+            // Get unassigned students for this field
+            String viewName = switch (ans1Field) {
+                case "A" -> "Unassigned_FieldA";
+                case "B" -> "Unassigned_FieldB";
+                case "C" -> "Unassigned_FieldC";
+                case "D" -> "Unassigned_FieldD";
+                default -> throw new IllegalArgumentException("Invalid field of interest");
+            };
+            
+            String countQuery = "SELECT COUNT(*) FROM " + viewName;
+            try (PreparedStatement ps = conn.c.prepareStatement(countQuery);
+                 ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                int studentCount = rs.getInt(1);
+                if (studentCount < 4) {
+                    conn.c.commit();
+                    return false; // Not enough students
+                }
+            }
+            
+            // Get available mentor with fewer than 3 groups
+            String mentorQuery = "SELECT f.mentor_id FROM Faculty f " +
+                               "LEFT JOIN Group_details g ON f.mentor_id = g.mentor_id " +
+                               "WHERE f.field_id = ? " +
+                               "GROUP BY f.mentor_id " +
+                               "HAVING COUNT(g.group_id) < 3 " +
+                               "LIMIT 1";
+            String mentorId = null;
+            try (PreparedStatement ps = conn.c.prepareStatement(mentorQuery)) {
+                ps.setInt(1, field_id);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        mentorId = rs.getString("mentor_id");
+                    }
+                }
+            }
+            
+            if (mentorId == null) {
+                conn.c.commit();
+                return false; // No available mentor
+            }
+            
+            // Select 4 students, including the current one
+            String studentQuery = "SELECT PRN FROM " + viewName + " WHERE PRN != ? LIMIT 3";
+            String[] studentPRNs = new String[4];
+            studentPRNs[0] = prn;
+            int index = 1;
+            try (PreparedStatement ps = conn.c.prepareStatement(studentQuery)) {
+                ps.setString(1, prn);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next() && index < 4) {
+                        studentPRNs[index++] = rs.getString("PRN");
+                    }
+                }
+            }
+            
+            if (index < 4) {
+                conn.c.commit();
+                return false; // Shouldn't happen due to count check
+            }
+            
+            // Create new group
+            String groupQuery = "INSERT INTO Group_details (field_id, is_approved, mentor_id) VALUES (?, 0, ?)";
+            int groupId;
+            try (PreparedStatement ps = conn.c.prepareStatement(groupQuery, Statement.RETURN_GENERATED_KEYS)) {
+                ps.setInt(1, field_id);
+                ps.setString(2, mentorId);
+                ps.executeUpdate();
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        groupId = rs.getInt(1);
+                    } else {
+                        throw new SQLException("Failed to retrieve group_id");
+                    }
+                }
+            }
+            
+            // Assign students to group
+            String updateStudentQuery = "UPDATE Student SET group_id = ? WHERE PRN = ?";
+            try (PreparedStatement ps = conn.c.prepareStatement(updateStudentQuery)) {
+                for (String studentPRN : studentPRNs) {
+                    ps.setInt(1, groupId);
+                    ps.setString(2, studentPRN);
+                    ps.executeUpdate();
+                }
+            }
+            
+            conn.c.commit();
+            return true;
+        } catch (SQLException e) {
+            conn.c.rollback();
+            throw e;
         }
     }
 
     public static void main(String[] args) {
-        new Quiz();
+        new Quiz("PRN001", "student");
     }
 }
