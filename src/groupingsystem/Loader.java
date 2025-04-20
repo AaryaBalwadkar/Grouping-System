@@ -14,6 +14,7 @@ import javax.swing.*;
 public class Loader extends JFrame implements Runnable {
     Thread t;
     JProgressBar bar;
+    String selectedRole, username;
     
     public void run(){
         try {
@@ -26,7 +27,11 @@ public class Loader extends JFrame implements Runnable {
                 } else {
                     setVisible(false);
                     // Start Quiz on EDT
-                    SwingUtilities.invokeLater(() -> new Quiz());
+                    if(selectedRole.equals("student")){
+                        SwingUtilities.invokeLater(() -> new Quiz());
+                    } else{
+                        SwingUtilities.invokeLater(() -> new GroupAssignment("PRN001", "Test Student"));
+                    }
                     dispose();
                     break; // Exit the loop to prevent multiple Quiz instantiations
                 }
@@ -37,7 +42,9 @@ public class Loader extends JFrame implements Runnable {
         }
     }
     
-    Loader(){
+    Loader(String selectedRole, String username){
+        this.selectedRole = selectedRole;
+        this.username = username;
         t = new Thread(this);
         
         setBounds(500, 200, 1200, 600);
@@ -57,7 +64,7 @@ public class Loader extends JFrame implements Runnable {
         bar.setBorder(BorderFactory.createEmptyBorder());
         add(bar);
         
-        JLabel lbuser = new JLabel("Welcome John");
+        JLabel lbuser = new JLabel("Welcome " + username);
         lbuser.setBounds(550, 100, 400, 40);
         lbuser.setFont(new Font("Arial", Font.BOLD, 25));
         add(lbuser);
@@ -72,6 +79,6 @@ public class Loader extends JFrame implements Runnable {
     }
     
     public static void main(String[] args){
-        new Loader();
+        new Loader("","");
     }
 }

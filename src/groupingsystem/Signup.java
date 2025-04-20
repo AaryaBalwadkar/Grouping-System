@@ -14,12 +14,14 @@ import java.awt.event.*;
 public class Signup extends JFrame implements ActionListener{
     
 	JButton btsignup,btloginlink;
-	JTextField tfname,tfprn,tfemail;
-        Choice cyear, cgender, cbranch;
+	JTextField tfname,tfid,tfemail;
+        Choice cyear, cgender, cbranch, cfield;
+        String selectedRole;
 	
-	Signup(){
+	Signup(String selectedRole){
+            this.selectedRole = selectedRole;
         setSize(1200,700);
-        setLocation(200,100);
+        setLocation(200,60);
         setLayout(null);
         
         // ---------------Right section--------------
@@ -73,16 +75,21 @@ public class Signup extends JFrame implements ActionListener{
         p2.add(tfname);
         
         // PRN section
-        JLabel lbprn = new JLabel("PRN");
-        lbprn.setBounds(100,260,100,25);
-        lbprn.setFont(new Font("Arial", Font.BOLD, 16));
-        p2.add(lbprn);
+        JLabel lbid;
+        if( selectedRole.equals("mentor")){
+            lbid = new JLabel("Mentor ID");
+        } else{
+            lbid = new JLabel("PRN");
+        }
+        lbid.setBounds(100,260,100,25);
+        lbid.setFont(new Font("Arial", Font.BOLD, 16));
+        p2.add(lbid);
         
-        tfprn = new JTextField();
-        tfprn.setBounds(100,280,350,40);
-        tfprn.setFont(new Font("Arial", Font.PLAIN, 20));
-        tfprn.setBorder(BorderFactory.createBevelBorder(1, Color.lightGray, Color.lightGray));
-        p2.add(tfprn);
+        tfid = new JTextField();
+        tfid.setBounds(100,280,350,40);
+        tfid.setFont(new Font("Arial", Font.PLAIN, 20));
+        tfid.setBorder(BorderFactory.createBevelBorder(1, Color.lightGray, Color.lightGray));
+        p2.add(tfid);
         
         // Email section
         JLabel lbemail = new JLabel("Email");
@@ -96,48 +103,69 @@ public class Signup extends JFrame implements ActionListener{
         tfemail.setBorder(BorderFactory.createBevelBorder(1, Color.lightGray, Color.lightGray));
         p2.add(tfemail);
         
-        // Branch section
-        JLabel lbbranch = new JLabel("Branch");
-        lbbranch.setBounds(100,380,100,25);
-        lbbranch.setFont(new Font("Arial", Font.BOLD, 16));
-        p2.add(lbbranch);
+        if( selectedRole.equals("mentor")){
+            JLabel lbfield = new JLabel("Field");
+            lbfield.setBounds(100,380,100,25);
+            lbfield.setFont(new Font("Arial", Font.BOLD, 16));
+            p2.add(lbfield);
 
-        cbranch = new Choice();
-        cbranch.setBounds(100,410,350,40);
-        cbranch.setFont(new Font("Arial", Font.PLAIN, 20));
-        cbranch.add("Computer");
-        cbranch.add("IT");
-        cbranch.add("Electronics");
-        cbranch.add("Mechanical");
-        p2.add(cbranch);
+            cfield = new Choice();
+            cfield.setBounds(100,410,350,40);
+            cfield.setFont(new Font("Arial", Font.PLAIN, 20));
+            cfield.add("Select Field");
+            cfield.add("Computer Science");
+            cfield.add("Artificial Intelligence");
+            cfield.add("Cybersecurity");
+            cfield.add("Web Development");
+            p2.add(cfield);
+        }
         
-        // Gender section
-        JLabel lbgender = new JLabel("Gender");
-        lbgender.setBounds(100,440,100,25);
-        lbgender.setFont(new Font("Arial", Font.BOLD, 16));
-        p2.add(lbgender);
-        
-        cgender = new Choice();
-        cgender.setBounds(100,470,350,40);
-        cgender.setFont(new Font("Arial", Font.PLAIN, 20));
-        cgender.add("Male");
-        cgender.add("Female");
-        p2.add(cgender);
-        
-        // Year section
-        JLabel lbyear = new JLabel("Year");
-        lbyear.setBounds(100,500,100,25);
-        lbyear.setFont(new Font("Arial", Font.BOLD, 16));
-        p2.add(lbyear);
-        
-        cyear = new Choice();
-        cyear.setBounds(100,530,350,40);
-        cyear.setFont(new Font("Arial", Font.PLAIN, 20));
-        cyear.add("1");
-        cyear.add("2");
-        cyear.add("3");
-        cyear.add("4");
-        p2.add(cyear);
+        if( selectedRole.equals("student")){// Branch section
+            JLabel lbbranch = new JLabel("Branch");
+            lbbranch.setBounds(100,380,100,25);
+            lbbranch.setFont(new Font("Arial", Font.BOLD, 16));
+            p2.add(lbbranch);
+
+            cbranch = new Choice();
+            cbranch.setBounds(100,410,350,40);
+            cbranch.setFont(new Font("Arial", Font.PLAIN, 20));
+            cbranch.add("Select Branch");
+            cbranch.add("Computer");
+            cbranch.add("IT");
+            cbranch.add("Electronics");
+            cbranch.add("Mechanical");
+            p2.add(cbranch);
+
+            // Gender section
+            JLabel lbgender = new JLabel("Gender");
+            lbgender.setBounds(100,440,100,25);
+            lbgender.setFont(new Font("Arial", Font.BOLD, 16));
+            p2.add(lbgender);
+
+            cgender = new Choice();
+            cgender.setBounds(100,470,350,40);
+            cgender.setFont(new Font("Arial", Font.PLAIN, 20));
+            cgender.add("Select Gender");
+            cgender.add("Male");
+            cgender.add("Female");
+            p2.add(cgender);
+
+            // Year section
+            JLabel lbyear = new JLabel("Year");
+            lbyear.setBounds(100,500,100,25);
+            lbyear.setFont(new Font("Arial", Font.BOLD, 16));
+            p2.add(lbyear);
+
+            cyear = new Choice();
+            cyear.setBounds(100,530,350,40);
+            cyear.setFont(new Font("Arial", Font.PLAIN, 20));
+            cyear.add("Select Year");
+            cyear.add("1");
+            cyear.add("2");
+            cyear.add("3");
+            cyear.add("4");
+            p2.add(cyear);
+        }
               
         // Signup button
         btsignup = new JButton("Signup");
@@ -169,30 +197,51 @@ public class Signup extends JFrame implements ActionListener{
     
     public void actionPerformed(ActionEvent ae) {
     if (ae.getSource() == btsignup) {
-        String name = tfname.getText().trim();
-        String prn = tfprn.getText().trim();
-        String email = tfemail.getText().trim();
-        String branch = cbranch.getSelectedItem();
-        String year = cyear.getSelectedItem();
-        String gender = cgender.getSelectedItem();
-
-        // Check if any field is empty
-        if (name.isEmpty() || prn.isEmpty() || email.isEmpty()
-                || branch.equals("Select Branch") || year.equals("Select Year") || gender.equals("Select Gender")) {
-            JOptionPane.showMessageDialog(null, "Please fill all the fields and make valid selections.", "Input Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        String name, id, email, field, branch, year, gender, query;
 
         try {
-            int yearInt = Integer.parseInt(year); // Convert year only after validation
-            String query = "insert into student values('" + prn + "','" + name + "','" + email + "','" + branch + "','" + gender + "','" + yearInt + "',NULL)";
-
+            if(selectedRole.equals("mentor")){
+                name = tfname.getText().trim();
+                id = tfid.getText().trim();
+                email = tfemail.getText().trim();
+                field = cfield.getSelectedItem();
+                // Check if any field is empty
+                if (name.isEmpty() || id.isEmpty() || email.isEmpty() || field.equals("Select Field")) {
+                    JOptionPane.showMessageDialog(null, "Please fill all the fields and make valid selections.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                int field_id;
+                field_id = switch (field) {
+                    case "Computer Science" -> 1;
+                    case "Artificial Intelligence" -> 2;
+                    case "Cybersecurity" -> 3;
+                    default -> 4;
+                };
+                
+                query = "insert into faculty values('" + id + "','" + field_id + "','" + name + "','" + email + "')";                
+            }else{
+                name = tfname.getText().trim();
+                id = tfid.getText().trim();
+                email = tfemail.getText().trim();
+                branch = cbranch.getSelectedItem();
+                year = cyear.getSelectedItem();
+                gender = cgender.getSelectedItem();
+                // Check if any field is empty
+                if (name.isEmpty() || id.isEmpty() || email.isEmpty()
+                        || branch.equals("Select Branch") || year.equals("Select Year") || gender.equals("Select Gender")) {
+                    JOptionPane.showMessageDialog(null, "Please fill all the fields and make valid selections.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                int yearInt = Integer.parseInt(year); // Convert year only after validation
+                query = "insert into student values('" + id + "','" + name + "','" + email + "','" + branch + "','" + gender + "','" + yearInt + "',NULL)";
+            }
             Conn c = new Conn();
             c.s.executeUpdate(query);
 
             JOptionPane.showMessageDialog(null, "Data Entered Successfully");
             setVisible(false);
-            new Login();
+            new Login(selectedRole);
 
             } catch (NumberFormatException nfe) {
                 JOptionPane.showMessageDialog(null, "Please select a valid year.", "Format Error", JOptionPane.ERROR_MESSAGE);
@@ -204,7 +253,7 @@ public class Signup extends JFrame implements ActionListener{
         if (ae.getSource() == btloginlink) {
             try {
                 setVisible(false);
-                new Login();
+                new Login(selectedRole);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -212,6 +261,6 @@ public class Signup extends JFrame implements ActionListener{
     }
        
     public static void main(String[] args){
-        new Signup();
+        new Signup("");
     }
 }

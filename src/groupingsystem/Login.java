@@ -8,8 +8,10 @@ import javax.swing.*;
 public class Login extends JFrame implements ActionListener {
     JButton btlogin,btsignuplink;
     JTextField tfemail, tfpassword;
+    String selectedRole;
 
-    Login() {
+    Login(String selectedRole) {
+        this.selectedRole = selectedRole;
         setSize(1200, 600);
         setLocation(200, 100);
         setLayout(null);
@@ -27,7 +29,7 @@ public class Login extends JFrame implements ActionListener {
         JLabel image = new JLabel(i3);
         image.setBounds(50, 0, 500, 500);
         p1.add(image);
-
+        
         // Left section
         JPanel p2 = new JPanel();
         p2.setBackground(Color.white);
@@ -63,7 +65,12 @@ public class Login extends JFrame implements ActionListener {
         p2.add(tfemail);
 
         // Password (PRN in your case)
-        JLabel lbpassword = new JLabel("PRN");
+        JLabel lbpassword;
+        if( selectedRole.equals("mentor")){
+            lbpassword = new JLabel("Mentor ID");
+        } else{
+            lbpassword = new JLabel("PRN");
+        }
         lbpassword.setBounds(100, 280, 100, 25);
         lbpassword.setFont(new Font("Arial", Font.BOLD, 16));
         p2.add(lbpassword);
@@ -104,22 +111,26 @@ public class Login extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent ae) {
         if (ae.getSource() == btlogin) {
             String email = tfemail.getText().trim();
-            String prn = tfpassword.getText().trim(); // treated as "password"
+            String password = tfpassword.getText().trim(); // treated as "password"
+            String query;
 
             // Check for empty fields
-            if (email.isEmpty() || prn.isEmpty()) {
+            if (email.isEmpty() || password.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Please enter both email and PRN.", "Input Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            String query = "SELECT * FROM student WHERE email = '" + email + "' AND prn = '" + prn + "'";
-
             try {
+                if ( selectedRole.equals("mentor")){
+                    query = "SELECT * FROM faculty WHERE email = '" + email + "' AND mentor_id = '" + password + "'";
+                } else {
+                    query = "SELECT * FROM student WHERE email = '" + email + "' AND prn = '" + password + "'";
+                }
                 Conn c = new Conn();
                 ResultSet rs = c.s.executeQuery(query);
                 if (rs.next()) {
                     setVisible(false);
-                    new Loader(); // assuming this is your next screen
+                    new Loader(selectedRole, rs.getString("name")); // assuming this is your next screen
                 } else {
                     JOptionPane.showMessageDialog(null, "Incorrect login. Please try again.");
                 }
@@ -131,7 +142,7 @@ public class Login extends JFrame implements ActionListener {
         if (ae.getSource() == btsignuplink) {
             try {
                 setVisible(false);
-                new Signup();
+                new Signup(selectedRole);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -140,7 +151,7 @@ public class Login extends JFrame implements ActionListener {
 
 
     public static void main(String[] args) {
-        new Login();
+        new Login("");
     }
 }
 
