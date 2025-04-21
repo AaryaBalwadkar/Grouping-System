@@ -39,55 +39,38 @@ public class LoginAs extends JFrame {
     private JPanel createPanel(String role, String imagePath) {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
-        panel.setBackground(Color.WHITE);
+        panel.setBackground(new Color(250, 240, 215));
+        panel.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        JLabel label = new JLabel(role, SwingConstants.CENTER);
-        label.setFont(new Font("Arial", Font.BOLD, 20));
-
-        // Load image using ClassLoader
-//        ImageIcon imageIcon = new ImageIcon(ClassLoader.getSystemResource(imagePath));
-//        if (imageIcon.getImage() == null) {
-//            JOptionPane.showMessageDialog(this, "Image not found: " + imagePath, "Error", JOptionPane.ERROR_MESSAGE);
-//            imageIcon = new ImageIcon(); // Fallback to empty icon
-//        }
-//        JLabel imageLabel = new JLabel(imageIcon);
-//        imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-//
-//        panel.add(label, BorderLayout.NORTH);
-//        panel.add(imageLabel, BorderLayout.CENTER);
-//
-//        panel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
-//
-//        panel.addMouseListener(new MouseAdapter() {
-//            public void mouseClicked(MouseEvent e) {
-//                selectedRole = role.toLowerCase();
-//                highlightPanel(panel);
-//                delayRedirect();
-//            }
-//        });
+        JLabel label = new JLabel(role);
+        label.setFont(new Font("Arial", Font.BOLD, 30));
+        label.setBounds(250, 20, 300, 50);
+        panel.add(label);
         
         ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource(imagePath));
-        Image i2 = i1.getImage().getScaledInstance(500, 500, Image.SCALE_DEFAULT);
+        Image i2 = i1.getImage().getScaledInstance(450, 450, Image.SCALE_DEFAULT);
         ImageIcon i3 = new ImageIcon(i2);
         JLabel image = new JLabel(i3);
         image.setBounds(50, 0, 500, 500);
         panel.add(image);
+        
+        panel.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                selectedRole = role.toLowerCase();
+                highlightPanel(panel);
+                delayRedirect();
+            }
+        });
 
         return panel;
     }
 
     private void highlightPanel(JPanel panel) {
-        // Reset borders
-        studentPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
-        teacherPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
-
-        // Highlight selected
-        panel.setBorder(BorderFactory.createLineBorder(Color.BLUE, 4));
-        panel.setBackground(Color.RED);
+        panel.setBackground(new Color(255, 219, 187));
     }
 
     private void delayRedirect() {
-        Timer timer = new Timer(2000, e -> {
+        Timer timer = new Timer(1000, e -> {
             new Login(selectedRole);
             dispose();
         });
