@@ -11,7 +11,7 @@ public class Home extends JFrame {
 
     public Home() {
         setTitle("Home");
-        setSize(1000, 700);
+        setSize(500, 700);
         setLocation(200, 60);
         setLayout(new BorderLayout()); // use BorderLayout to manage regions
 
