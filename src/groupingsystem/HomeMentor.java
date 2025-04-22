@@ -8,13 +8,16 @@
 //    private JPanel menuPanel;
 //    private JPanel contentPanel;
 //    private boolean isMenuVisible = true;
+//    private int mentorId;
 //
-//    public HomeMentor() {
+//    public HomeMentor(int mentorId) {
+//        this.mentorId = mentorId;
 //        setTitle("Home");
 //        setSize(1200, 500);
 //        setLocation(200, 60);
 //        setLayout(new BorderLayout());
 //
+//        // Menu Panel
 //        menuPanel = new JPanel();
 //        menuPanel.setPreferredSize(new Dimension(200, getHeight()));
 //        menuPanel.setBackground(new Color(255, 219, 187));
@@ -40,6 +43,7 @@
 //            menuPanel.add(btn);
 //        }
 //
+//        // Content Panel
 //        contentPanel = new JPanel(new BorderLayout());
 //        contentPanel.setBackground(Color.WHITE);
 //
@@ -57,8 +61,8 @@
 //
 //        showContent("Welcome! Please select an option.");
 //
-//        profileBtn.addActionListener(e -> showMentorDetails(201));
-//        groupBtn.addActionListener(e -> showGroupDetails(201)); // MODIFIED
+//        profileBtn.addActionListener(e -> showMentorDetails(mentorId));
+//        groupBtn.addActionListener(e -> showGroupDetails(mentorId));
 //
 //        add(menuPanel, BorderLayout.WEST);
 //        add(contentPanel, BorderLayout.CENTER);
@@ -134,48 +138,80 @@
 //            return;
 //        }
 //
-//        String[] columns = {"Group ID", "Mentor ID", "Group Name", "Field ID"};
-//        JTable table = new JTable(groupData, columns);
-//        JScrollPane scrollPane = new JScrollPane(table);
+//        // Updated column names to include approval status
+//        String[] columns = {"Group ID", "Field ID", "Status", "Mentor ID"};
+//        Object[][] tableData = new Object[groupData.length][4];
+//    
+//        // Convert data to include human-readable status and store original is_approved value
+//        for (int i = 0; i < groupData.length; i++) {
+//            tableData[i][0] = groupData[i][0]; // Group ID
+//            tableData[i][1] = groupData[i][1]; // Field ID
+//        
+//            // Convert is_approved to human-readable status
+//            String isApproved = groupData[i][2];
+//            tableData[i][2] = "1".equals(isApproved) ? "Approved" : "Pending Approval";
+//            tableData[i][3] = groupData[i][3]; // Mentor ID
+//        }
+//
+//        JTable table = new JTable(tableData, columns) {
+//            @Override
+//            public Class<?> getColumnClass(int column) {
+//                return column == 0 || column == 1 || column == 3 ? Integer.class : String.class;
+//            }
+//        };
+//    
 //        table.setFillsViewportHeight(true);
+//        JScrollPane scrollPane = new JScrollPane(table);
 //
 //        JPanel mainPanel = new JPanel(new BorderLayout());
 //        mainPanel.setBackground(Color.WHITE);
 //        mainPanel.add(scrollPane, BorderLayout.CENTER);
 //
-//        // 💡 Create side-by-side input panel using GridLayout
-//        JPanel inputWrapper = new JPanel(new GridLayout(1, 2, 10, 10));
-//        inputWrapper.setBackground(new Color(255, 239, 213));
-//        inputWrapper.setBorder(BorderFactory.createTitledBorder("Manage Groups"));
+//        // Create management panel with 3 sections
+//        JPanel managementPanel = new JPanel(new GridLayout(1, 3, 10, 10));
+//        managementPanel.setBackground(new Color(255, 239, 213));
+//        managementPanel.setBorder(BorderFactory.createTitledBorder("Group Management"));
 //
-//        // ➕ Update Group Panel
+//        // 1. Approval Panel
+//        JPanel approvalPanel = new JPanel();
+//        approvalPanel.setBackground(new Color(255, 239, 213));
+//        JTextField approveGroupIdField = new JTextField(5);
+//        JButton approveButton = new JButton("Approve Group");
+//        approveButton.setBackground(new Color(144, 238, 144)); // Light green
+//    
+//        approvalPanel.add(new JLabel("Group ID:"));
+//        approvalPanel.add(approveGroupIdField);
+//        approvalPanel.add(approveButton);
+//
+//        // 2. Update Panel (existing)
 //        JPanel updatePanel = new JPanel();
 //        updatePanel.setBackground(new Color(255, 239, 213));
 //        JTextField groupIdField = new JTextField(5);
 //        JTextField fieldIdField = new JTextField(5);
 //        JButton updateButton = new JButton("Update Field ID");
-//
+//    
 //        updatePanel.add(new JLabel("Group ID:"));
 //        updatePanel.add(groupIdField);
 //        updatePanel.add(new JLabel("New Field ID:"));
 //        updatePanel.add(fieldIdField);
 //        updatePanel.add(updateButton);
 //
-//        // ❌ Delete Group Panel
+//        // 3. Delete Panel (existing)
 //        JPanel deletePanel = new JPanel();
 //        deletePanel.setBackground(new Color(255, 239, 213));
 //        JTextField deleteGroupIdField = new JTextField(5);
 //        JButton deleteButton = new JButton("Delete Group");
-//
+//        deleteButton.setBackground(new Color(255, 182, 193)); // Light red
+//    
 //        deletePanel.add(new JLabel("Group ID:"));
 //        deletePanel.add(deleteGroupIdField);
 //        deletePanel.add(deleteButton);
 //
-//        inputWrapper.add(updatePanel);
-//        inputWrapper.add(deletePanel);
+//        managementPanel.add(approvalPanel);
+//        managementPanel.add(updatePanel);
+//        managementPanel.add(deletePanel);
 //
-//        // Place inputWrapper ABOVE the table
-//        mainPanel.add(inputWrapper, BorderLayout.NORTH);
+//        //mainPanel.add(managementPanel, BorderLayout.NORTH);
 //
 //        // Replace content panel content
 //        Component[] components = contentPanel.getComponents();
@@ -189,7 +225,36 @@
 //        contentPanel.revalidate();
 //        contentPanel.repaint();
 //
-//        // 🔁 Update Button Logic
+//        // Approve Button Action
+//        approveButton.addActionListener(e -> {
+//            try {
+//                int groupIdToApprove = Integer.parseInt(approveGroupIdField.getText());
+//            
+//                if (!dao.canMentorApproveGroup(mentorId, groupIdToApprove)) {
+//                    JOptionPane.showMessageDialog(this, 
+//                        "Either:\n1. Group doesn't exist\n2. You're not its mentor\n3. It's already approved",
+//                        "Cannot Approve", JOptionPane.WARNING_MESSAGE);
+//                    return;
+//                }
+//            
+//                int confirm = JOptionPane.showConfirmDialog(this,
+//                    "Approve Group ID " + groupIdToApprove + "?",
+//                    "Confirm Approval", JOptionPane.YES_NO_OPTION);
+//                
+//                if (confirm == JOptionPane.YES_OPTION) {
+//                    boolean success = dao.approveGroup(groupIdToApprove);
+//                    if (success) {
+//                        JOptionPane.showMessageDialog(this, "Group approved successfully!");
+//                        showGroupDetails(mentorId); // Refresh the view
+//                    } else {
+//                        JOptionPane.showMessageDialog(this, "Approval failed. Please try again.");
+//                    }
+//                }
+//            } catch (NumberFormatException ex) {
+//                JOptionPane.showMessageDialog(this, "Please enter a valid Group ID.");
+//            }
+//        });
+//
 //        updateButton.addActionListener(e -> {
 //            try {
 //                int groupId = Integer.parseInt(groupIdField.getText());
@@ -200,26 +265,28 @@
 //                    JOptionPane.showMessageDialog(this, "Group updated successfully!");
 //                    showGroupDetails(mentorId);
 //                } else {
-//                    JOptionPane.showMessageDialog(this, "Update failed. Check the Group ID.");
+//                    JOptionPane.showMessageDialog(this, "Update failed. Check the Group ID and Field ID.");
 //                }
 //            } catch (NumberFormatException ex) {
 //                JOptionPane.showMessageDialog(this, "Please enter valid integers.");
 //            }
 //        });
 //
-//        // 🗑 Delete Button Logic
 //        deleteButton.addActionListener(e -> {
 //            try {
 //                int groupIdToDelete = Integer.parseInt(deleteGroupIdField.getText());
 //
-//                int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete Group ID " + groupIdToDelete + "?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+//                int confirm = JOptionPane.showConfirmDialog(this, 
+//                    "Are you sure you want to delete Group ID " + groupIdToDelete + "?", 
+//                    "Confirm Delete", JOptionPane.YES_NO_OPTION);
+//                
 //                if (confirm == JOptionPane.YES_OPTION) {
 //                    boolean success = dao.deleteGroupById(groupIdToDelete);
 //                    if (success) {
 //                        JOptionPane.showMessageDialog(this, "Group deleted successfully.");
-//                        showGroupDetails(mentorId); // Refresh table
+//                        showGroupDetails(mentorId);
 //                    } else {
-//                        JOptionPane.showMessageDialog(this, "Delete failed. Group ID may not exist.");
+//                        JOptionPane.showMessageDialog(this, "Delete failed. Group ID may not exist or has dependencies.");
 //                    }
 //                }
 //            } catch (NumberFormatException ex) {
@@ -228,9 +295,8 @@
 //        });
 //    }
 //
-//
 //    public static void main(String[] args) {
-//        SwingUtilities.invokeLater(HomeMentor::new);
+//        SwingUtilities.invokeLater(() -> new HomeMentor(201)); // Example mentorId for testing
 //    }
 //}
 
@@ -244,7 +310,7 @@ public class HomeMentor extends JFrame {
     private JPanel menuPanel;
     private JPanel contentPanel;
     private boolean isMenuVisible = true;
-    private int mentorId; // Store the mentor's ID
+    private int mentorId;
 
     public HomeMentor(int mentorId) {
         this.mentorId = mentorId;
@@ -253,6 +319,7 @@ public class HomeMentor extends JFrame {
         setLocation(200, 60);
         setLayout(new BorderLayout());
 
+        // Menu Panel
         menuPanel = new JPanel();
         menuPanel.setPreferredSize(new Dimension(200, getHeight()));
         menuPanel.setBackground(new Color(255, 219, 187));
@@ -278,6 +345,7 @@ public class HomeMentor extends JFrame {
             menuPanel.add(btn);
         }
 
+        // Content Panel
         contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBackground(Color.WHITE);
 
@@ -372,54 +440,80 @@ public class HomeMentor extends JFrame {
             return;
         }
 
-        // Updated column names to match Group_details table columns
+        // Updated column names to match Group_details
         String[] columns = {"Group ID", "Field ID", "Is Approved", "Mentor ID"};
-        JTable table = new JTable(groupData, columns);
+        Object[][] tableData = new Object[groupData.length][4];
+
+        // Convert data to include human-readable approval status
+        for (int i = 0; i < groupData.length; i++) {
+            tableData[i][0] = groupData[i][0]; // Group ID
+            tableData[i][1] = groupData[i][1]; // Field ID
+            tableData[i][2] = "1".equals(groupData[i][2]) ? "Yes" : "No"; // Is Approved
+            tableData[i][3] = groupData[i][3]; // Mentor ID
+        }
+
+        JTable table = new JTable(tableData, columns) {
+            @Override
+            public Class<?> getColumnClass(int column) {
+                return column == 0 || column == 1 || column == 3 ? Integer.class : String.class;
+            }
+        };
+
         table.setFillsViewportHeight(true);
-        // Set column widths for better readability
-        table.getColumnModel().getColumn(0).setPreferredWidth(100); // Group ID
-        table.getColumnModel().getColumn(1).setPreferredWidth(100); // Field ID
-        table.getColumnModel().getColumn(2).setPreferredWidth(100); // Is Approved
-        table.getColumnModel().getColumn(3).setPreferredWidth(100); // Mentor ID
+        table.setRowHeight(30); // Ensure rows are tall enough
+        table.getColumnModel().getColumn(0).setPreferredWidth(100);
+        table.getColumnModel().getColumn(1).setPreferredWidth(100);
+        table.getColumnModel().getColumn(2).setPreferredWidth(100);
+        table.getColumnModel().getColumn(3).setPreferredWidth(100);
         JScrollPane scrollPane = new JScrollPane(table);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(Color.WHITE);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Create side-by-side input panel using GridLayout
-        JPanel inputWrapper = new JPanel(new GridLayout(1, 2, 10, 10));
-        inputWrapper.setBackground(new Color(255, 239, 213));
-        inputWrapper.setBorder(BorderFactory.createTitledBorder("Manage Groups"));
+        // Create management panel with 3 sections
+        JPanel managementPanel = new JPanel(new GridLayout(1, 3, 10, 10));
+        managementPanel.setBackground(new Color(255, 239, 213));
+        managementPanel.setBorder(BorderFactory.createTitledBorder("Group Management"));
+        managementPanel.setPreferredSize(new Dimension(0, 120)); // Increased height
 
-        // Update Group Panel
+        // Approval Panel
+        JPanel approvalPanel = new JPanel();
+        approvalPanel.setBackground(new Color(255, 239, 213));
+        JTextField approveGroupIdField = new JTextField(5);
+        JButton approveButton = new JButton("Approve Group");
+        approveButton.setBackground(new Color(144, 238, 144)); // Light green
+        approvalPanel.add(new JLabel("Group ID:"));
+        approvalPanel.add(approveGroupIdField);
+        approvalPanel.add(approveButton);
+
+        // Update Panel
         JPanel updatePanel = new JPanel();
         updatePanel.setBackground(new Color(255, 239, 213));
         JTextField groupIdField = new JTextField(5);
         JTextField fieldIdField = new JTextField(5);
         JButton updateButton = new JButton("Update Field ID");
-
         updatePanel.add(new JLabel("Group ID:"));
         updatePanel.add(groupIdField);
         updatePanel.add(new JLabel("New Field ID:"));
         updatePanel.add(fieldIdField);
         updatePanel.add(updateButton);
 
-        // Delete Group Panel
+        // Delete Panel
         JPanel deletePanel = new JPanel();
         deletePanel.setBackground(new Color(255, 239, 213));
         JTextField deleteGroupIdField = new JTextField(5);
         JButton deleteButton = new JButton("Delete Group");
-
+        deleteButton.setBackground(new Color(255, 182, 193)); // Light red
         deletePanel.add(new JLabel("Group ID:"));
         deletePanel.add(deleteGroupIdField);
         deletePanel.add(deleteButton);
 
-        inputWrapper.add(updatePanel);
-        inputWrapper.add(deletePanel);
+        managementPanel.add(approvalPanel);
+        managementPanel.add(updatePanel);
+        managementPanel.add(deletePanel);
 
-        // Place inputWrapper ABOVE the table
-        mainPanel.add(inputWrapper, BorderLayout.NORTH);
+        mainPanel.add(managementPanel, BorderLayout.NORTH); // Add management panel
 
         // Replace content panel content
         Component[] components = contentPanel.getComponents();
@@ -433,7 +527,36 @@ public class HomeMentor extends JFrame {
         contentPanel.revalidate();
         contentPanel.repaint();
 
-        // Update Button Logic
+        // Approve Button Action
+        approveButton.addActionListener(e -> {
+            try {
+                int groupIdToApprove = Integer.parseInt(approveGroupIdField.getText());
+
+                if (!dao.canMentorApproveGroup(mentorId, groupIdToApprove)) {
+                    JOptionPane.showMessageDialog(this,
+                            "Cannot approve: Group doesn't exist, you're not its mentor, or it's already approved.",
+                            "Cannot Approve", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                int confirm = JOptionPane.showConfirmDialog(this,
+                        "Approve Group ID " + groupIdToApprove + "?",
+                        "Confirm Approval", JOptionPane.YES_NO_OPTION);
+
+                if (confirm == JOptionPane.YES_OPTION) {
+                    boolean success = dao.approveGroup(groupIdToApprove);
+                    if (success) {
+                        JOptionPane.showMessageDialog(this, "Group approved successfully!");
+                        showGroupDetails(mentorId); // Refresh
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Approval failed. Please try again.");
+                    }
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid Group ID.");
+            }
+        });
+
         updateButton.addActionListener(e -> {
             try {
                 int groupId = Integer.parseInt(groupIdField.getText());
@@ -444,24 +567,26 @@ public class HomeMentor extends JFrame {
                     JOptionPane.showMessageDialog(this, "Group updated successfully!");
                     showGroupDetails(mentorId);
                 } else {
-                    JOptionPane.showMessageDialog(this, "Update failed. Check the Group ID.");
+                    JOptionPane.showMessageDialog(this, "Update failed. Check the Group ID and Field ID.");
                 }
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Please enter valid integers.");
             }
         });
 
-        // Delete Button Logic
         deleteButton.addActionListener(e -> {
             try {
                 int groupIdToDelete = Integer.parseInt(deleteGroupIdField.getText());
 
-                int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete Group ID " + groupIdToDelete + "?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+                int confirm = JOptionPane.showConfirmDialog(this,
+                        "Are you sure you want to delete Group ID " + groupIdToDelete + "?",
+                        "Confirm Delete", JOptionPane.YES_NO_OPTION);
+
                 if (confirm == JOptionPane.YES_OPTION) {
                     boolean success = dao.deleteGroupById(groupIdToDelete);
                     if (success) {
                         JOptionPane.showMessageDialog(this, "Group deleted successfully.");
-                        showGroupDetails(mentorId); // Refresh table
+                        showGroupDetails(mentorId);
                     } else {
                         JOptionPane.showMessageDialog(this, "Delete failed. Group ID may not exist or has dependencies.");
                     }
@@ -473,6 +598,6 @@ public class HomeMentor extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new HomeMentor(201)); // Example mentorId for testing
+        SwingUtilities.invokeLater(() -> new HomeMentor(201));
     }
 }
