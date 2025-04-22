@@ -293,19 +293,18 @@ public class Login extends JFrame implements ActionListener {
                 ResultSet rs = c.s.executeQuery(user.getLoginQuery());
                 if (rs.next()) {
                     boolean hasAttemptedQuiz = false;
-                    String prn = rs.getString("prn");
                     String name = rs.getString("name");
 
                     if (selectedRole.equals("student")) {
                         Conn c2 = new Conn();
-                        String responseQuery = "SELECT * FROM response WHERE prn = '" + prn + "'";
+                        String responseQuery = "SELECT * FROM response WHERE prn = '" + id + "'";
                         ResultSet responseRs = c2.s.executeQuery(responseQuery);
                         if (responseRs.next()) {
                             hasAttemptedQuiz = true;
                         }
                     }
                     setVisible(false);
-                    new Loader(selectedRole, prn, name, hasAttemptedQuiz);
+                    new Loader(selectedRole, id, name, hasAttemptedQuiz);
                 } else {
                     JOptionPane.showMessageDialog(null, "Incorrect login. Please try again.");
                 }

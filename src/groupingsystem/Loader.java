@@ -14,7 +14,7 @@ import javax.swing.*;
 public class Loader extends JFrame implements Runnable {
     Thread t;
     JProgressBar bar;
-    String selectedRole, prn, username;
+    String selectedRole, id, username;
     Boolean hasAttemptedQuiz;
     
     public void run(){
@@ -28,10 +28,14 @@ public class Loader extends JFrame implements Runnable {
                 } else {
                     setVisible(false);
                     // Start Quiz on EDT
-                    if(selectedRole.equals("student") && !hasAttemptedQuiz){
-                        SwingUtilities.invokeLater(() -> new Quiz(prn, selectedRole));
+                    if(selectedRole.equals("student")){
+                        if(!hasAttemptedQuiz){
+                            SwingUtilities.invokeLater(() -> new Quiz(id, selectedRole));
+                        } else{
+                            SwingUtilities.invokeLater(() -> new Home(id));
+                        }
                     } else{
-                        SwingUtilities.invokeLater(() -> new Home());
+                        SwingUtilities.invokeLater(() -> new HomeMentor(Integer.parseInt(id)));
                     }
                     dispose();
                     break; // Exit the loop to prevent multiple Quiz instantiations
@@ -43,9 +47,9 @@ public class Loader extends JFrame implements Runnable {
         }
     }
     
-    Loader(String selectedRole, String prn, String username, Boolean hasAttemptedQuiz){
+    Loader(String selectedRole, String id, String username, Boolean hasAttemptedQuiz){
         this.selectedRole = selectedRole;
-        this.prn = prn;
+        this.id = id;
         this.username = username;
         this.hasAttemptedQuiz = hasAttemptedQuiz;
         t = new Thread(this);

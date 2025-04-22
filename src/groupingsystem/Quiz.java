@@ -156,7 +156,7 @@ public class Quiz extends JFrame {
                         JOptionPane.showMessageDialog(this, "Quiz submitted. Waiting for more students to form a group.");
                     }
                     dispose();
-                    new Login(selectedRole);
+                    new Home(prn);
                 } catch (SQLException ex) {
                     JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
